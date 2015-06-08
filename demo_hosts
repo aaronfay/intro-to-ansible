@@ -1,0 +1,2 @@
+[web]
+mydemo.com ansible_ssh_user=root ansible_ssh_private_key=~/.ssh/id_pub.rsa

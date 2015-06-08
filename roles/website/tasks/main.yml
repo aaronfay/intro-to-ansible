@@ -1,0 +1,50 @@
+
+# install nginx/pip/git
+- name: install system packages
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+   - nginx
+   - git
+   - supervisor
+   - python-pip
+   - python-virtualenv
+
+# install gunicorn/virtualenv
+- name: install python packages
+  pip: name={{ item }} virtualenv=/opt/envs/website
+  with_items:
+   - gunicorn
+   - 'git+https://github.com/aaronfay/intro-to-ansible-demo-site.git#egg=demo-site'
+
+# write out templates
+- name: write out supervisor config
+  template: >
+    src=etc/supervisor/conf.d/demo_site.j2
+    dest=/etc/supervisor/conf.d/demo_site.conf
+
+# run project
+- name: run with supervisor
+  supervisorctl: >
+    name=demo_site
+    state=restarted
+
+# remove default nginx config
+- name: unlink default nginx config
+  file: >
+   dest=/etc/nginx/sites-enabled/default
+   state=absent
+
+# write out nginx config
+- name: write out nginx config
+  template: >
+    src=etc/nginx/sites-available/demo_site.j2
+    dest=/etc/nginx/sites-available/demo_site.conf
+
+- name: enable the site with nginx
+  file: >
+    state=link
+    src=/etc/nginx/sites-available/demo_site.conf
+    dest=/etc/nginx/sites-enabled/demo_site.conf
+
+- name: restart nginx
+  shell: nginx -s reload

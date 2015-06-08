@@ -1,0 +1,11 @@
+[program:demo_site]
+command=/opt/envs/website/bin/gunicorn -w4 -b127.0.0.1:{{ wsgi_port }} demo_site.serve:app
+environment=
+process_name=demo_site
+autostart=true
+autorestart=true
+startsecs=5
+startretries=3
+stopwaitsecs=10
+stdout_logfile=/var/log/supervisor/%(program_name)s_stdout.log
+stderr_logfile=/var/log/supervisor/%(program_name)s_stderr.log
